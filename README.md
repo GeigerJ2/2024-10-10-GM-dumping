@@ -19,6 +19,32 @@
 
 </details>
 
+## Notes from the GM
+
+- Check what happens when moving Folder -> Relative symlinks. Should still work.
+- Use first 8 chars for the directory and file names
+- `data-non-hidden` -> `data-not-hidden`
+- Just calculations always in the top level `calculations` directory, remove hidden AiiDA data folder -> Option becomes
+  `--derefence/--no-derefence` (`--deduplicate` would be a better option, especially with it being off by default)
+- What if sub-workflow in a group, but `--only-top-level` workflows activated? -> This is similar to the tracing back of
+  links in `verdi archive create`.
+- The logic of how to evaluate the `incremental` option will be important also for future `push/pull` features
+  - One could only dump sealed nodes and just keep track of the dumped UUIDs
+  - Otherwise, if entities can still change, check the mtime or via the hash
+- Give warning to user when duplicated data is being dumped to disk
+- Use `os.link` to make hard links rather than symlinks
+- Original motivation for linking not the hiding, but de-duplication, e.g., if WF contained in multiple groups
+- The command should also allow `mirror`ing the case of data being deleted from the profile, such that it is also
+  deleted from the directory
+  - Either via filenames or hashes (again, one needs to take care of modifications on the node)
+  - Possibly create table with hashes/UUIDs and last modified times
+  - If has already been sealed, don't touch; or only dump entities which are sealed in the first place
+- Look again into `--prepare-for-submission` for data dumping in a way that one can directly resubmit a calculation
+  without manual modifications
+- Add `--all-entries` option, as well
+- Use case for incremental dumping could be to run it every morning (e.g. via `cron`) of a project that is being run
+  through AiiDA, e.g., to always have an easily understandable and presentable version ready to discuss with NM
+
 ## Dumping collection data
 
 Let's first run with the defaults and see where we get:
@@ -135,6 +161,11 @@ Some things to consider:
 - `raw`/`rich` data dumping of assocated `Data` nodes is now implemented at this level
 - I'm also working on retrieving remote data (if still existing on the remote `Computer`); a first PoC works ([this PR](https://github.com/aiidateam/aiida-core/pull/6578)), but needs some improvements, e.g. allowing for file globbing/exclusion, checking the total size beforehand (as this might be
   large)
+
+## Notes from the meetings
+
+- Check the behavior if a workflow is in mutiple groups
+-
 
 ## Known TODOs
 
